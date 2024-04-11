@@ -10,11 +10,10 @@ import (
 	"github.com/pttrulez/investor-go/internal/types"
 )
 
-type Portfolio = types.Portfolio
-type PortfolioRepository = types.PortfolioRepository
 type PortfolioPostgres struct {
 	db *sql.DB
 }
+type Portfolio = types.Portfolio
 
 func NewPortfolioPostgres(db *sql.DB) types.PortfolioRepository {
 	return &PortfolioPostgres{db: db}

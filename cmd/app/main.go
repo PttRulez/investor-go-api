@@ -9,12 +9,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/pttrulez/investor-go/internal/config"
-	postgres "github.com/pttrulez/investor-go/internal/repository"
+	postgres "github.com/pttrulez/investor-go/internal/repository/postgres"
 	"github.com/pttrulez/investor-go/internal/router"
 )
 
 func main() {
-
 	cfg := config.MustLoad()
 
 	r := chi.NewRouter()

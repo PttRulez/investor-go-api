@@ -2,6 +2,7 @@ package router
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -59,7 +60,7 @@ func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth
 		}
 
 		if registerData.Role == "" {
-			registerData.Role = types.INVESTOR
+			registerData.Role = types.Investor
 		}
 
 		// Creating new user
@@ -85,6 +86,7 @@ func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth
 		}
 
 		user, err := repo.User.GetUserByEmail(loginData.Email)
+		fmt.Println(loginData.Email)
 		if err != nil {
 			response.WriteErrorJSON(w, http.StatusBadRequest, err.Error())
 			return

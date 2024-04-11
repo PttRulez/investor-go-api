@@ -8,12 +8,8 @@ import (
 )
 
 type User = types.User
-type UserRepository = types.UserRepository
 type UserPostgres struct {
 	db *sql.DB
-}
-
-type PgUserCreate struct {
 }
 
 func NewUserPostgres(db *sql.DB) types.UserRepository {
