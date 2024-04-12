@@ -15,21 +15,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type RegisterData struct {
-	Email    string     `json:"email" validate:"required,email"`
-	Name     string     `json:"name" validate:"required"`
-	Password string     `json:"password" validate:"required"`
-	Role     types.Role `json:"role" `
-}
-
-type LoginData struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
-}
-
 func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth) {
 	r.Post("/register", func(w http.ResponseWriter, r *http.Request) {
-		var registerData RegisterData
+		var registerData types.RegisterUser
 
 		// Return error if json couldn't be decoded
 		if err := json.NewDecoder(r.Body).Decode(&registerData); err != nil {
@@ -77,7 +65,7 @@ func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth
 		response.WriteJSON(w, http.StatusOK, newUser)
 	})
 	r.Post("/login", func(w http.ResponseWriter, r *http.Request) {
-		var loginData LoginData
+		var loginData types.LoginUser
 
 		// Return error if json couldn't be decoded
 		if err := json.NewDecoder(r.Body).Decode(&loginData); err != nil {
@@ -107,7 +95,7 @@ func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth
 			"name":  user.Name,
 			"role":  user.Role,
 		}
-		jwtauth.SetExpiry(claims, time.Now().Add(time.Hour*1))
+		jwtauth.SetExpiry(claims, time.Now().Add(time.Hour*6))
 		_, tokenString, _ := tokenAuth.Encode(claims)
 
 		response.WriteOKJSON(w, map[string]string{"token": tokenString})

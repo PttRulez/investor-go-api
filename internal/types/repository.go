@@ -10,7 +10,10 @@ type Repository struct {
 }
 
 type DealRepository interface {
-	Cre
+	CreateDeal(d *CreateDeal) (*Deal, error)
+	UpdateDeal(d Deal) (*Deal, error)
+	DeleteDealById(id int) error
+	GetDealById(id int) (*Deal, error)
 }
 
 type PortfolioRepository interface {

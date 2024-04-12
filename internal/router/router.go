@@ -13,5 +13,6 @@ func Init(r chi.Router, repo *types.Repository, cfg *config.Config) {
 	r.Route("/", func(r chi.Router) {
 		AuthRoutes(r, repo, tokenAuth)
 		PortfolioRoutes(r, repo, tokenAuth)
+		DealRoutes(r, repo, tokenAuth)
 	})
 }

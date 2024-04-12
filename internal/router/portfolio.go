@@ -20,8 +20,7 @@ func PortfolioRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JW
 
 		// List of portfolios
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			_, claims, _ := jwtauth.FromContext(r.Context())
-			portfolios, err := repo.Portfolio.GetPortfolioListByUserId(int(claims["id"].(float64)))
+			portfolios, err := repo.Portfolio.GetPortfolioListByUserId(getUserIdFrowJwt(r))
 			if err != nil {
 				response.WriteErrorJSON(w, http.StatusInternalServerError, err.Error())
 				return

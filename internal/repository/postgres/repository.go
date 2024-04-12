@@ -28,8 +28,9 @@ func NewPostgresRepo(cfg config.PostgresConfig) (*Repository, error) {
 	}
 
 	return &Repository{
-		User:      NewUserPostgres(db),
+		Deal:      NewDealPostgres(db),
 		Portfolio: NewPortfolioPostgres(db),
+		User:      NewUserPostgres(db),
 	}, nil
 }
 func createAllTables(db *sql.DB) error {
