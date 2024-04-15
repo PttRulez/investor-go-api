@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pttrulez/investor-go/internal/services/moex"
 	"github.com/pttrulez/investor-go/internal/types"
+	tmoex "github.com/pttrulez/investor-go/internal/types/moex"
 )
 
 type MoexBondsPostgres struct {
@@ -16,7 +16,7 @@ func NewMoexBondsPostgres(db *sql.DB) types.MoexBondRepository {
 	return &MoexBondsPostgres{db: db}
 }
 
-func (pg *MoexBondsPostgres) Create(bond moex.Bond) (*moex.Bond, error) {
+func (pg *MoexBondsPostgres) Create(bond tmoex.Bond) (*tmoex.Bond, error) {
 	querySting := `INSERT INTO moex_bonds (board, engine, market, id, name, shortname, ticker)
     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`
 
@@ -26,7 +26,7 @@ func (pg *MoexBondsPostgres) Create(bond moex.Bond) (*moex.Bond, error) {
 		return nil, row.Err()
 	}
 
-	var newBond moex.Bond
+	var newBond tmoex.Bond
 	err := row.Scan(&newBond.Board, &newBond.Engine, &newBond.Market, &newBond.Id, &newBond.Name,
 		&newBond.ShortName, &newBond.Ticker)
 	if err != nil {
@@ -37,17 +37,17 @@ func (pg *MoexBondsPostgres) Create(bond moex.Bond) (*moex.Bond, error) {
 	return &newBond, nil
 }
 
-func (pg *MoexBondsPostgres) GetBulk(ids []int) ([]*moex.Bond, error) {
+func (pg *MoexBondsPostgres) GetBulk(ids []int) ([]*tmoex.Bond, error) {
 
 	return nil, nil
 }
 
-func (pg *MoexBondsPostgres) GetByTicker(ticker string) (*moex.Bond, error) {
+func (pg *MoexBondsPostgres) GetByTicker(ticker string) (*tmoex.Bond, error) {
 
 	return nil, nil
 }
 
-func (pg *MoexBondsPostgres) GetById(id int) (*moex.Bond, error) {
+func (pg *MoexBondsPostgres) GetById(id int) (*tmoex.Bond, error) {
 
 	return nil, nil
 }

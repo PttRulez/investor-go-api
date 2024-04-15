@@ -10,9 +10,7 @@ import (
 	"github.com/pttrulez/investor-go/internal/types"
 )
 
-type Repository = types.Repository
-
-func NewPostgresRepo(cfg config.PostgresConfig) (*Repository, error) {
+func NewPostgresRepo(cfg config.PostgresConfig) (*types.Repository, error) {
 	connStr := fmt.Sprintf(`postgresql://%v:%v@%v:%v/%v?sslmode=%v`,
 		cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.DBName, cfg.SSLMode)
 	db, err := sql.Open("postgres", connStr)
@@ -27,9 +25,14 @@ func NewPostgresRepo(cfg config.PostgresConfig) (*Repository, error) {
 		return nil, err
 	}
 
-	return &Repository{
-		Deal:      NewDealPostgres(db),
+	return &types.Repository{
+		Deal: NewDealPostgres(db),
+		Moex: types.MoexRepository{
+			Bonds:  NewMoexBondsPostgres(db),
+			Shares: NewMoexSharesPostgres(db),
+		},
 		Portfolio: NewPortfolioPostgres(db),
+		Position:  NewPositionPostgres(db),
 		User:      NewUserPostgres(db),
 	}, nil
 }
@@ -93,7 +96,6 @@ func createDealsTable(db *sql.DB) error {
 		exchange varchar(50) not null,
 		portfolio_id integer references portfolios(id) not null,
 		price numeric(10, 2) not null,
-		security_id integer not null,
 		security_type varchar(50) not null,
 		ticker varchar(50) not null,
 		type varchar(50) not null

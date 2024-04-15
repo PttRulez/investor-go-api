@@ -11,6 +11,7 @@ import (
 	"github.com/pttrulez/investor-go/internal/config"
 	postgres "github.com/pttrulez/investor-go/internal/repository/postgres"
 	"github.com/pttrulez/investor-go/internal/router"
+	"github.com/pttrulez/investor-go/internal/services"
 )
 
 func main() {
@@ -19,10 +20,12 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	repository, err := postgres.NewPostgresRepo(cfg.Pg)
+	services := services.NewServiceContainer(repository)
+
 	if err != nil {
 		panic("Failed to initialize postgres repository: " + err.Error())
 	}
-	router.Init(r, repository, cfg)
+	router.Init(r, repository, services, cfg)
 
 	logger := slog.Default()
 	logger.Info(fmt.Sprintf("Listening on port %v", cfg.ApiPort))

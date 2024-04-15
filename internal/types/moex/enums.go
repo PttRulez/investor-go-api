@@ -1,12 +1,14 @@
-package moex
+package tmoex
 
 type Engine string
+
 const (
 	Stock    = "stock"
 	Currency = "currency"
 )
 
 type Market string
+
 const (
 	Shares = "shares"
 	Bonds  = "bonds"
@@ -15,12 +17,14 @@ const (
 )
 
 type Board string
+
 const (
 	Tqbr = "TQBR" // Т+: Акции и ДР - безадрес
 	Cets = "CETS" // Системные сделки - безадрес.
 )
 
 type SecurityType string
+
 const (
 	CommonShare    = "common_share"    // "акция обыкновенная"
 	PreferredShare = "preferred_share" // "акция привелигированная"

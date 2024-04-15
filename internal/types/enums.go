@@ -1,5 +1,12 @@
 package types
 
+type Role string
+
+const (
+	Admin    Role = "Admin"
+	Investor Role = "Investor"
+)
+
 type Exchange string
 
 const (
@@ -15,51 +22,21 @@ func (e Exchange) Validate() bool {
 	return true
 }
 
-
-
-type Role string
-
-const (
-	Admin    Role = "Admin"
-	Investor Role = "Investor"
-)
-
 type SecurityType string
 
 const (
-	Bond     = "Bond"
-	Currency = "Currency"
-	Futures  = "Futures"
-	Index    = "Index"
-	Pif      = "Pif"
-	Share    = "Share"
+	Bond     SecurityType = "Bond"
+	Currency SecurityType = "Currency"
+	Futures  SecurityType = "Futures"
+	Index    SecurityType = "Index"
+	Pif      SecurityType = "Pif"
+	Share    SecurityType = "Share"
 )
 
 func (e SecurityType) Validate() bool {
 	switch e {
 	case Bond:
-	case Currency:
-	case Futures:
-	case Index:
-	case Pif:
 	case Share:
-	default:
-		return false
-	}
-	return true
-}
-
-type TransactionType string
-
-const (
-	Cashout = "Cashout"
-	Deposit = "Deposit"
-)
-
-func (e TransactionType) Validate() bool {
-	switch e {
-	case Cashout:
-	case Deposit:
 	default:
 		return false
 	}

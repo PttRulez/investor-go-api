@@ -1,16 +1,19 @@
 package types
 
-import "github.com/pttrulez/investor-go/internal/services/moex"
+import (
+	tmoex "github.com/pttrulez/investor-go/internal/types/moex"
+)
 
 type Repository struct {
 	Deal      DealRepository
-	MoexBond  MoexBondRepository
+	Moex      MoexRepository
+	Position  PositionRepository
 	Portfolio PortfolioRepository
 	User      UserRepository
 }
 
 type DealRepository interface {
-	CreateDeal(d *CreateDeal) (*Deal, error)
+	CreateDeal(d *RepoCreateDeal) (*Deal, error)
 	UpdateDeal(d Deal) (*Deal, error)
 	DeleteDealById(id int) error
 	GetDealById(id int) (*Deal, error)
@@ -24,18 +27,28 @@ type PortfolioRepository interface {
 	UpdatePortfolio(id string, u PortfolioUpdate) (*Portfolio, error)
 }
 
+type PositionRepository interface {
+	CreatePosition(p Position) error
+	UpdatePosition(p Position) error
+}
+
+type MoexRepository struct {
+	Bonds  MoexBondRepository
+	Shares MoexShareRepository
+}
+
 type MoexBondRepository interface {
-	Create(bond moex.Bond) (*moex.Bond, error)
-	GetBulk(ids []int) ([]*moex.Bond, error)
-	GetByTicker(ticker string) (*moex.Bond, error)
-	GetById(id int) (*moex.Bond, error)
+	Create(bond tmoex.Bond) (*tmoex.Bond, error)
+	GetBulk(ids []int) ([]*tmoex.Bond, error)
+	GetByTicker(ticker string) (*tmoex.Bond, error)
+	GetById(id int) (*tmoex.Bond, error)
 }
 
 type MoexShareRepository interface {
-	Create(share moex.Share) (*moex.Share, error)
-	GetBulk(ids []int) ([]*moex.Share, error)
-	GetByTicker(ticker string) (*moex.Share, error)
-	GetById(id int) (*moex.Share, error)
+	Create(share *tmoex.Share) (*tmoex.Share, error)
+	GetBulk(ids []int) ([]*tmoex.Share, error)
+	GetByTicker(ticker string) (*tmoex.Share, error)
+	GetById(id int) (*tmoex.Share, error)
 }
 
 type UserRepository interface {

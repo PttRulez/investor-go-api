@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/pttrulez/investor-go/internal/types"
 )
@@ -15,18 +14,16 @@ func NewDealPostgres(db *sql.DB) types.DealRepository {
 	return &DealPostgres{db: db}
 }
 
-func (pg *DealPostgres) CreateDeal(d *types.CreateDeal) (*types.Deal, error) {
-	queryString := `INSERT INTO deals (amount, date, exchange, portfolio_id, price, security_id, security_type, ticker, type) VALUES 
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *;`
-	fmt.Println("AAAAA")
-	row := pg.db.QueryRow(queryString, d.Amount, d.Date, d.Exchange, d.PortfolioId, d.Price, d.SecurityId, d.SecurityType, d.Ticker, d.Type)
-	fmt.Println("BBBBBB")
+func (pg *DealPostgres) CreateDeal(d *types.RepoCreateDeal) (*types.Deal, error) {
+	queryString := `INSERT INTO deals (amount, date, exchange, portfolio_id, price, security_type, ticker, type) VALUES 
+    ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;`
+	row := pg.db.QueryRow(queryString, d.Amount, d.Date, d.Exchange, d.PortfolioId, d.Price, d.SecurityType, d.Ticker, d.Type)
 	if row.Err() != nil {
 		return nil, row.Err()
 	}
 
 	var deal types.Deal
-	err := row.Scan(&deal.Id, &deal.PortfolioId, &deal.Ticker, &deal.Amount, &deal.Price, &deal.Date)
+	err := row.Scan(&deal.Id, &deal.Amount, &deal.Date, &deal.Exchange, &deal.PortfolioId, &deal.Price, &deal.SecurityType, &deal.Ticker, &deal.Type)
 	if err != nil {
 		return nil, err
 	}
