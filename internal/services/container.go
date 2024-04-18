@@ -2,19 +2,22 @@ package services
 
 import (
 	"github.com/go-playground/validator/v10"
-	"github.com/pttrulez/investor-go/internal/services/moex"
-	validatorservice "github.com/pttrulez/investor-go/internal/services/validator"
 	"github.com/pttrulez/investor-go/internal/types"
 )
 
 type ServiceContainer struct {
-	Moex      *moex.MoexService
+	Deal      *DealService
+	Moex      *MoexService
+	Position  *PositionService
 	Validator *validator.Validate
 }
 
 func NewServiceContainer(repo *types.Repository) *ServiceContainer {
-	return &ServiceContainer{
-		Moex:      moex.NewMoexService(repo),
-		Validator: validatorservice.NewValidator(),
-	}
+	container := &ServiceContainer{}
+	container.Deal = NewDealService(repo, container)
+	container.Position = NewPositionService(repo)
+	container.Moex = NewMoexService(repo)
+	container.Validator = NewValidator()
+
+	return container
 }

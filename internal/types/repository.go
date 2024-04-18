@@ -6,30 +6,33 @@ import (
 
 type Repository struct {
 	Deal      DealRepository
+	Expert    ExpertRepository
 	Moex      MoexRepository
 	Position  PositionRepository
 	Portfolio PortfolioRepository
 	User      UserRepository
 }
 
+type CashoutRepository interface {
+	Delete(id int) error
+	Insert(c *Cashout) error
+}
+type DepositRepository interface {
+	Delete(id int) error
+	Insert(c *Deposit) error
+}
 type DealRepository interface {
-	CreateDeal(d *RepoCreateDeal) (*Deal, error)
-	UpdateDeal(d Deal) (*Deal, error)
-	DeleteDealById(id int) error
-	GetDealById(id int) (*Deal, error)
+	Delete(id int) error
+	GetDealsListForSecurity(exchange Exchange, portfolioId int, securityType SecurityType, securityId int) ([]*Deal, error)
+	Insert(d *RepoCreateDeal) error
+	Update(d Deal) error
 }
 
-type PortfolioRepository interface {
-	CreatePortfolio(u Portfolio) (*Portfolio, error)
-	DeletePortfolioById(id int) error
-	GetPortfolioById(id int) (*Portfolio, error)
-	GetPortfolioListByUserId(userId int) ([]*Portfolio, error)
-	UpdatePortfolio(id string, u PortfolioUpdate) (*Portfolio, error)
-}
-
-type PositionRepository interface {
-	CreatePosition(p Position) error
-	UpdatePosition(p Position) error
+type ExpertRepository interface {
+	Delete(id int) error
+	GetListByUserId(userId int) ([]*Expert, error)
+	Insert(e Expert) error
+	Update(e Expert) error
 }
 
 type MoexRepository struct {
@@ -38,21 +41,40 @@ type MoexRepository struct {
 }
 
 type MoexBondRepository interface {
-	Create(bond tmoex.Bond) (*tmoex.Bond, error)
-	GetBulk(ids []int) ([]*tmoex.Bond, error)
+	Insert(bond tmoex.Bond) error
 	GetByTicker(ticker string) (*tmoex.Bond, error)
-	GetById(id int) (*tmoex.Bond, error)
 }
 
 type MoexShareRepository interface {
-	Create(share *tmoex.Share) (*tmoex.Share, error)
-	GetBulk(ids []int) ([]*tmoex.Share, error)
+	Insert(share *tmoex.Share) error
 	GetByTicker(ticker string) (*tmoex.Share, error)
-	GetById(id int) (*tmoex.Share, error)
+}
+
+type OpinionRepository interface {
+	Insert(e Opinion) error
+	GetListByUserId(userId int) ([]*Opinion, error)
+	Update(e Opinion) error
+	Delete(id int) error
+}
+
+type PortfolioRepository interface {
+	Delete(id int) error
+	GetById(id int) (*Portfolio, error)
+	GetListByUserId(userId int) ([]*Portfolio, error)
+	Insert(u Portfolio) error
+	Update(u PortfolioUpdate) error
+}
+
+type PositionRepository interface {
+	GetListByPortfolioId(id int) ([]*Position, error)
+	Get(exchange Exchange, portfolioId int, securityId int,
+		securityType SecurityType) (*Position, error)
+	Insert(p *Position) error
+	Update(p *Position) error
 }
 
 type UserRepository interface {
-	CreateUser(u User) (*User, error)
-	GetUserByEmail(email string) (*User, error)
-	GetUserById(id int) (*User, error)
+	Insert(u User) error
+	GetByEmail(email string) (*User, error)
+	GetById(id int) (*User, error)
 }

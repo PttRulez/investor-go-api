@@ -1,4 +1,4 @@
-package moex
+package services
 
 import (
 	"github.com/pttrulez/investor-go/internal/types"

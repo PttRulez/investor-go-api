@@ -10,4 +10,5 @@ type Portfolio struct {
 type PortfolioUpdate struct {
 	Compound *bool   `json:"compound,omitempty" db:"compound" validate:"bool"`
 	Name     *string `json:"name,omitempty" db:"name" validate:"string"`
+	Id       int     `json:"id" db:"id"  validate:"required,int"`
 }

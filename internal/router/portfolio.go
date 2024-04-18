@@ -20,7 +20,7 @@ func PortfolioRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JW
 
 		// List of portfolios
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			portfolios, err := repo.Portfolio.GetPortfolioListByUserId(getUserIdFrowJwt(r))
+			portfolios, err := repo.Portfolio.GetListByUserId(getUserIdFrowJwt(r))
 			if err != nil {
 				response.WriteErrorJSON(w, http.StatusInternalServerError, err.Error())
 				return
@@ -46,14 +46,15 @@ func PortfolioRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JW
 			portfolioData.UserId = int(claims["id"].(float64))
 
 			// Create new Portfolio
-			newPortfolio, err := repo.Portfolio.CreatePortfolio(portfolioData)
+			err := repo.Portfolio.Insert(portfolioData)
 			if err != nil {
 				response.WriteErrorJSON(w, http.StatusInternalServerError, err.Error())
 			}
-			response.WriteOKJSON(w, newPortfolio)
+			w.WriteHeader(http.StatusCreated)
 		})
 
-		r.Patch("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		// Update portfolio
+		r.Put("/", func(w http.ResponseWriter, r *http.Request) {
 			//_, claims, _ := jwtauth.FromContext(r.Context())
 
 			var portfolioData types.PortfolioUpdate
@@ -63,11 +64,11 @@ func PortfolioRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JW
 			}
 
 			// Update Portfolio
-			updatedPortfolio, err := repo.Portfolio.UpdatePortfolio(chi.URLParam(r, "id"), portfolioData)
+			err = repo.Portfolio.Update(portfolioData)
 			if err != nil {
 				response.WriteErrorJSON(w, http.StatusInternalServerError, err.Error())
 			}
-			response.WriteOKJSON(w, updatedPortfolio)
+			w.WriteHeader(http.StatusOK)
 		})
 
 	})

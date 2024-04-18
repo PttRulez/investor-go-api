@@ -1,4 +1,4 @@
-package moex
+package services
 
 type BondService struct {
 }

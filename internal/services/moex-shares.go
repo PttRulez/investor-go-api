@@ -1,15 +1,14 @@
-package moex
+package services
 
 import (
 	"database/sql"
 
-	moexapi "github.com/pttrulez/investor-go/internal/services/moex-api"
 	"github.com/pttrulez/investor-go/internal/types"
 	tmoex "github.com/pttrulez/investor-go/internal/types/moex"
 )
 
 type ShareService struct {
-	moexApi *moexapi.IssApi
+	moexApi *IssApi
 	repo    *types.Repository
 }
 
@@ -18,7 +17,23 @@ func (s *ShareService) GetByTicker(ticker string) (*tmoex.Share, error) {
 	share, err := s.repo.Moex.Shares.GetByTicker(ticker)
 	if err == sql.ErrNoRows {
 		// если нет то создаем и возвращаем
-		return s.createByTicker(ticker)
+		// запрос на информацию по бумаге из апишки московской биржи
+		moexShare, err := s.moexApi.GetSecurityInfoByTicker(ticker)
+		if err != nil {
+			return nil, err
+		}
+
+		// сохраняем в бд
+		err = s.repo.Moex.Shares.Insert(moexShare)
+		if err != nil {
+			return nil, err
+		}
+
+		// ищем её же в бд
+		share, err = s.repo.Moex.Shares.GetByTicker(ticker)
+		if err != nil {
+			return nil, err
+		}
 	} else if err != nil {
 		return nil, err
 	}
@@ -27,22 +42,9 @@ func (s *ShareService) GetByTicker(ticker string) (*tmoex.Share, error) {
 	return share, nil
 }
 
-func (s *ShareService) createByTicker(ticker string) (*tmoex.Share, error) {
-	moexShare, err := s.moexApi.GetSecurityInfoByTicker(ticker)
-	if err != nil {
-		return nil, err
-	}
-
-	moexShare, err = s.repo.Moex.Shares.Create(moexShare)
-	if err != nil {
-		return nil, err
-	}
-	return moexShare, nil
-}
-
 func NewShareService(repo *types.Repository) *ShareService {
 	return &ShareService{
-		moexApi: moexapi.CreateISSApiClient(),
+		moexApi: CreateISSApiClient(),
 		repo:    repo,
 	}
 }

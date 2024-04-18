@@ -16,34 +16,8 @@ func NewMoexSharesPostgres(db *sql.DB) types.MoexShareRepository {
 	return &MoexSharesPostgres{db: db}
 }
 
-func (pg *MoexSharesPostgres) Create(share *tmoex.Share) (*tmoex.Share, error) {
-	querySting := `INSERT INTO moex_shares (board, engine, market, name, shortname, ticker)
-    VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`
-
-	row := pg.db.QueryRow(querySting, share.Board, share.Engine, share.Market, share.Name, share.ShortName, share.Ticker)
-	if row.Err() != nil {
-		fmt.Println("Failed to execute query:", row.Err())
-		return nil, row.Err()
-	}
-
-	var newShare tmoex.Share
-	err := row.Scan(&newShare.Id, &newShare.Board, &newShare.Engine, &newShare.Market, &newShare.Name,
-		&newShare.ShortName, &newShare.Ticker)
-	if err != nil {
-		fmt.Println("[MoexSharesPostgres.Create] - Failed to scan:", err)
-		return nil, err
-	}
-
-	return &newShare, nil
-}
-
-func (pg *MoexSharesPostgres) GetBulk(ids []int) ([]*tmoex.Share, error) {
-
-	return nil, nil
-}
-
 func (pg *MoexSharesPostgres) GetByTicker(ticker string) (*tmoex.Share, error) {
-	querySting := `SELECT * FROM moex_bonds WHERE ticker = $1;`
+	querySting := `SELECT * FROM moex_shares WHERE ticker = $1;`
 
 	row := pg.db.QueryRow(querySting, ticker)
 	if row.Err() != nil {
@@ -52,15 +26,24 @@ func (pg *MoexSharesPostgres) GetByTicker(ticker string) (*tmoex.Share, error) {
 	}
 
 	var share tmoex.Share
-	err := row.Scan(&share.Board, &share.Engine, &share.Market, &share.Id, &share.Name, &share.ShortName, &share.Ticker)
+	err := row.Scan(&share.Id, &share.Board, &share.Engine, &share.Market, &share.Name, &share.ShortName, &share.Ticker)
 	if err != nil {
+		fmt.Println("[MoexSharesPostgres GetByTicker] Failed to scan:", err)
 		return nil, err
 	}
 
 	return &share, nil
 }
 
-func (pg *MoexSharesPostgres) GetById(id int) (*tmoex.Share, error) {
+func (pg *MoexSharesPostgres) Insert(share *tmoex.Share) error {
+	querySting := `INSERT INTO moex_shares (board, engine, market, name, shortname, ticker)
+    VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`
 
-	return nil, nil
+	_, err := pg.db.Exec(querySting, share.Board, share.Engine, share.Market, share.Name, share.ShortName, share.Ticker)
+	if err != nil {
+		fmt.Println("[MoexSharePostgres Insert] Failed to execute query:", err)
+		return err
+	}
+
+	return nil
 }

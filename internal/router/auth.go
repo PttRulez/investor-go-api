@@ -33,7 +33,7 @@ func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth
 		}
 
 		// Check if user with this email already exists
-		existingUser, err := repo.User.GetUserByEmail(registerData.Email)
+		existingUser, err := repo.User.GetByEmail(registerData.Email)
 		if existingUser != nil {
 			response.WriteErrorJSON(w, http.StatusBadRequest, "Пользователь с таким email уже существует")
 			return
@@ -52,7 +52,7 @@ func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth
 		}
 
 		// Creating new user
-		newUser, err := repo.User.CreateUser(types.User{
+		err = repo.User.Insert(types.User{
 			Email:          registerData.Email,
 			Name:           registerData.Name,
 			HashedPassword: string(encpw),
@@ -62,7 +62,7 @@ func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth
 			response.WriteErrorJSON(w, http.StatusInternalServerError, "Failed to create new user")
 		}
 
-		response.WriteJSON(w, http.StatusOK, newUser)
+		w.WriteHeader(http.StatusCreated)
 	})
 	r.Post("/login", func(w http.ResponseWriter, r *http.Request) {
 		var loginData types.LoginUser
@@ -73,7 +73,7 @@ func AuthRoutes(r chi.Router, repo *types.Repository, tokenAuth *jwtauth.JWTAuth
 			return
 		}
 
-		user, err := repo.User.GetUserByEmail(loginData.Email)
+		user, err := repo.User.GetByEmail(loginData.Email)
 		fmt.Println(loginData.Email)
 		if err != nil {
 			response.WriteErrorJSON(w, http.StatusBadRequest, err.Error())

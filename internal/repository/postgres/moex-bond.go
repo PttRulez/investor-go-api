@@ -16,38 +16,30 @@ func NewMoexBondsPostgres(db *sql.DB) types.MoexBondRepository {
 	return &MoexBondsPostgres{db: db}
 }
 
-func (pg *MoexBondsPostgres) Create(bond tmoex.Bond) (*tmoex.Bond, error) {
-	querySting := `INSERT INTO moex_bonds (board, engine, market, id, name, shortname, ticker)
-    VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`
+func (pg *MoexBondsPostgres) GetByTicker(ticker string) (*tmoex.Bond, error) {
+	queryString := `SELECT * FROM moex_bonds WHERE ticker = $1;`
 
-	row := pg.db.QueryRow(querySting, bond.Board, bond.Engine, bond.Market, bond.Id, bond.Name, bond.ShortName, bond.Ticker)
-	if row.Err() != nil {
-		fmt.Println("Failed to execute query:", row.Err())
-		return nil, row.Err()
-	}
+	row := pg.db.QueryRow(queryString, ticker)
 
-	var newBond tmoex.Bond
-	err := row.Scan(&newBond.Board, &newBond.Engine, &newBond.Market, &newBond.Id, &newBond.Name,
-		&newBond.ShortName, &newBond.Ticker)
+	bond := &tmoex.Bond{}
+	err := row.Scan(&bond.Board, &bond.Engine, &bond.Market, &bond.Id, &bond.Name, &bond.ShortName, &bond.Ticker)
 	if err != nil {
-		fmt.Println("[MoexBondsPostgres.Create] - Failed to scan:", err)
+		fmt.Println("[MoexBondsPostgres GetByTicker] Failed to execute query:", err)
 		return nil, err
 	}
 
-	return &newBond, nil
+	return bond, nil
 }
 
-func (pg *MoexBondsPostgres) GetBulk(ids []int) ([]*tmoex.Bond, error) {
+func (pg *MoexBondsPostgres) Insert(bond tmoex.Bond) error {
+	querySting := `INSERT INTO moex_bonds (board, engine, market, id, name, shortname, ticker)
+    VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`
 
-	return nil, nil
-}
+	_, err := pg.db.Exec(querySting, bond.Board, bond.Engine, bond.Market, bond.Id, bond.Name, bond.ShortName, bond.Ticker)
+	if err != nil {
+		fmt.Println("[NewMoexBondsPostgres Insert] Failed to execute query:", err)
+		return err
+	}
 
-func (pg *MoexBondsPostgres) GetByTicker(ticker string) (*tmoex.Bond, error) {
-
-	return nil, nil
-}
-
-func (pg *MoexBondsPostgres) GetById(id int) (*tmoex.Bond, error) {
-
-	return nil, nil
+	return nil
 }

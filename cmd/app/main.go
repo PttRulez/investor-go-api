@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/pttrulez/investor-go/internal/config"
 	postgres "github.com/pttrulez/investor-go/internal/repository/postgres"
 	"github.com/pttrulez/investor-go/internal/router"
@@ -19,6 +20,14 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   cfg.AllowedCors,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 	repository, err := postgres.NewPostgresRepo(cfg.Pg)
 	services := services.NewServiceContainer(repository)
 
@@ -28,10 +37,11 @@ func main() {
 	router.Init(r, repository, services, cfg)
 
 	logger := slog.Default()
-	logger.Info(fmt.Sprintf("Listening on port %v", cfg.ApiPort))
+	address := fmt.Sprintf("%v:%v", cfg.ApiHost, cfg.ApiPort)
+	logger.Info(fmt.Sprintf("Listening on  %v", address))
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf("localhost:%v", cfg.ApiPort),
+		Addr:    address,
 		Handler: r,
 	}
 

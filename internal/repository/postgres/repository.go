@@ -26,7 +26,8 @@ func NewPostgresRepo(cfg config.PostgresConfig) (*types.Repository, error) {
 	}
 
 	return &types.Repository{
-		Deal: NewDealPostgres(db),
+		Deal:   NewDealPostgres(db),
+		Expert: NewExpertPostgres(db),
 		Moex: types.MoexRepository{
 			Bonds:  NewMoexBondsPostgres(db),
 			Shares: NewMoexSharesPostgres(db),
@@ -65,6 +66,14 @@ func createAllTables(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+	err = createDepositsTable(db)
+	if err != nil {
+		return err
+	}
+	err = createCashoutsTable(db)
+	if err != nil {
+		return err
+	}
 
 	//  ---------------------- MOEX ----------------------
 	err = createMoexBondsTable(db)
@@ -79,15 +88,25 @@ func createAllTables(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
-	err = createTransactionsTable(db)
-	if err != nil {
-		return err
-	}
 
 	return err
 }
 
 // ---------------------- FUNCS FOR TABLES CREATION  ----------------------
+func createCashoutsTable(db *sql.DB) error {
+	queryString := `create table if not exists cashouts (
+		id serial primary key,
+		amount integer not null,
+		date date not null,
+		portfolio_id integer references portfolios(id) not null
+		)`
+
+	_, err := db.Exec(queryString)
+	if err != nil {
+		log.Fatal("[createCashoutsTable] err", err)
+	}
+	return err
+}
 func createDealsTable(db *sql.DB) error {
 	queryString := `create table if not exists deals (
 		id serial primary key,
@@ -96,6 +115,7 @@ func createDealsTable(db *sql.DB) error {
 		exchange varchar(50) not null,
 		portfolio_id integer references portfolios(id) not null,
 		price numeric(10, 2) not null,
+		security_id integer not null,
 		security_type varchar(50) not null,
 		ticker varchar(50) not null,
 		type varchar(50) not null
@@ -107,10 +127,24 @@ func createDealsTable(db *sql.DB) error {
 	}
 	return err
 }
+func createDepositsTable(db *sql.DB) error {
+	queryString := `create table if not exists deposits (
+		id serial primary key,
+		amount integer not null,
+		date date not null,
+		portfolio_id integer references portfolios(id) not null
+	)`
+
+	_, err := db.Exec(queryString)
+	if err != nil {
+		log.Fatal("[createDepositsTable] err", err)
+	}
+	return err
+}
 func createExpertsTable(db *sql.DB) error {
 	queryString := `create table if not exists experts (
 		id serial primary key,
-		avatarUrl varchar(100),
+		avatar_url varchar(100),
 		name varchar(50) not null,
 		user_id integer references users(id) not null
 	)`
@@ -179,28 +213,12 @@ func createPositionsTable(db *sql.DB) error {
 		portfolio_id integer references portfolios(id) not null,
 		security_id integer not null,
 		security_type varchar(50) not null,
-		trade_saldo integer not null,
 		target_price numeric(10, 2)
 	)`
 
 	_, err := db.Exec(queryString)
 	if err != nil {
 		log.Fatal("[createPositionsTable] err", err)
-	}
-	return err
-}
-func createTransactionsTable(db *sql.DB) error {
-	queryString := `create table if not exists transactions (
-		id serial primary key,
-		amount integer not null,
-		date date not null,
-		portfolio_id integer references portfolios(id) not null,
-		type varchar(50) not null
-	)`
-
-	_, err := db.Exec(queryString)
-	if err != nil {
-		log.Fatal("[createTransactionsTable] err", err)
 	}
 	return err
 }
@@ -262,7 +280,7 @@ func createMoexSharesTable(db *sql.DB) error {
 		market varchar(50) not null,
 		name varchar(120) not null,
 		shortName varchar(50) not null,
-		ticker varchar(10) not null
+		ticker varchar(10) not null unique
 	)`
 
 	_, err := db.Exec(queryString)

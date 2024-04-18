@@ -1,4 +1,4 @@
-package moexapi
+package services
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/pttrulez/investor-go/internal/types"
 	tmoex "github.com/pttrulez/investor-go/internal/types/moex"
 )
 
@@ -51,7 +52,7 @@ func (api *IssApi) GetSecurityInfoByTicker(ticker string) (*tmoex.Share, error) 
 		return nil, err
 	}
 
-	data := &MoexApiResponseSecurityInfo{}
+	data := &types.MoexApiResponseSecurityInfo{}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		fmt.Println("[Api GetSecurityByTicker MoexApiResponseSecurityInfo json.Unmarshal]:", err)
@@ -95,7 +96,7 @@ func (api *IssApi) GetSecurityInfoByTicker(ticker string) (*tmoex.Share, error) 
 	}, nil
 }
 
-func (api *IssApi) GetStocksCurrentPrices(market tmoex.Market, tickers []string) (*MoexApiResponseCurrentPrices, error) {
+func (api *IssApi) GetStocksCurrentPrices(market tmoex.Market, tickers []string) (*types.MoexApiResponseCurrentPrices, error) {
 	uri := fmt.Sprintf("%s/engines/stock/markets/%s/securities.json", api.baseUrl, market)
 	req, err := http.NewRequest(http.MethodGet, uri, nil)
 	if err != nil {
@@ -121,7 +122,7 @@ func (api *IssApi) GetStocksCurrentPrices(market tmoex.Market, tickers []string)
 		return nil, err
 	}
 
-	data := &MoexApiResponseCurrentPrices{}
+	data := &types.MoexApiResponseCurrentPrices{}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		fmt.Println("[Api GetStocksCurrentPrices MoexApiResponseCurrentPrices json.Unmarshal]:", err)

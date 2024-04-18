@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -17,9 +18,11 @@ type PostgresConfig struct {
 }
 
 type Config struct {
-	Pg        PostgresConfig
-	JwtSecret string
-	ApiPort   int
+	Pg          PostgresConfig
+	JwtSecret   string
+	ApiHost     string
+	ApiPort     int
+	AllowedCors []string
 }
 
 func MustLoad() *Config {
@@ -29,16 +32,19 @@ func MustLoad() *Config {
 	}
 
 	pgConfig := PostgresConfig{
-		DBName:   os.Getenv("DB_NAME"),
-		Host:     os.Getenv("DB_HOST"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Port:     os.Getenv("DB_PORT"),
-		SSLMode:  os.Getenv("DB_SSLMODE"),
-		Username: os.Getenv("DB_USERNAME"),
+		DBName:   os.Getenv("PG_DB_NAME"),
+		Host:     os.Getenv("PG_HOST"),
+		Password: os.Getenv("PG_PASSWORD"),
+		Port:     os.Getenv("PG_PORT"),
+		SSLMode:  os.Getenv("PG_SSLMODE"),
+		Username: os.Getenv("PG_USERNAME"),
 	}
 
 	jwtSecret := os.Getenv("JWT_SECRET")
-	apiPort, _ := strconv.Atoi(os.Getenv("API_PORT"))
+	apiPort, _ := strconv.Atoi(os.Getenv("GO_API_PORT"))
+	apiHost := os.Getenv("GO_API_HOST")
+	corsString := os.Getenv("CORS_ALLOWED_ORIGINS")
+	allowedCors := strings.Split(corsString, ",")
 
-	return &Config{ApiPort: apiPort, JwtSecret: jwtSecret, Pg: pgConfig}
+	return &Config{AllowedCors: allowedCors, ApiPort: apiPort, ApiHost: apiHost, JwtSecret: jwtSecret, Pg: pgConfig}
 }

@@ -1,4 +1,4 @@
-package moexapi
+package types
 
 type MoexApiResponseSecurityInfo struct {
 	Description struct {

@@ -2,7 +2,6 @@ package router
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -13,7 +12,8 @@ import (
 	"github.com/pttrulez/investor-go/internal/types"
 )
 
-func DealRoutes(r chi.Router, repo *types.Repository, services *services.ServiceContainer, tokenAuth *jwtauth.JWTAuth) {
+func DealRoutes(r chi.Router, repo *types.Repository, services *services.ServiceContainer,
+	 tokenAuth *jwtauth.JWTAuth) {
 	r.Route("/deal", func(r chi.Router) {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator(tokenAuth))
@@ -34,28 +34,13 @@ func DealRoutes(r chi.Router, repo *types.Repository, services *services.Service
 				return
 			}
 
-			// Проверяем есть ли в бд такакя бумага. Если нет, то сервис создаст её.
-			// Также если тикер в dealData будет неправильный, то будет ошибка
-			if dealData.SecurityType == types.Share && dealData.Exchange == types.Moex {
-				_, err := services.Moex.Shares.GetByTicker(
-					dealData.Ticker,
-				)
-				if err != nil {
-					fmt.Println("[/deal] POST handler: ", err)
-					response.WriteErrorJSON(w, http.StatusInternalServerError, "Что-то пошло не так")
-					return
-				}
-			}
-
 			// Создаем сделку
-			newDeal, err := repo.Deal.CreateDeal(&dealData)
+			err := services.Deal.CreateDeal(dealData)
 			if err != nil {
-				response.WriteErrorJSON(w, http.StatusInternalServerError, err.Error())
+				response.WriteErrorJSON(w, http.StatusInternalServerError, "Что-то пошло не так")
 			}
 
-
-
-			response.WriteCreatedJSON(w, newDeal)
+			w.WriteHeader(http.StatusCreated)
 		})
 	})
 }
