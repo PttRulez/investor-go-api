@@ -8,3 +8,5 @@ type Deposit struct {
 	Id          int       `json:"id" db:"id"`
 	PortfolioId int       `json:"portfolioId" db:"portfolio_id"`
 }
+
+func (c Deposit) isTransaction() {}

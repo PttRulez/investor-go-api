@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,24 +13,23 @@ import (
 	tmoex "github.com/pttrulez/investor-go/internal/types/moex"
 )
 
-type IssApi struct {
+type IssApiService struct {
 	baseUrl string
 	client  *http.Client
 }
 
-func CreateISSApiClient() *IssApi {
-	return &IssApi{
+func NewIssApiService() *IssApiService {
+	return &IssApiService{
 		baseUrl: "https://iss.moex.com/iss",
 		client:  &http.Client{},
 	}
 }
 
-func (api *IssApi) GetSecurityInfoByTicker(ticker string) (*tmoex.Share, error) {
+func (api *IssApiService) GetSecurityInfoByTicker(ticker string) (*tmoex.Security, error) {
 	uri := fmt.Sprintf("%s/securities/%s.json", api.baseUrl, ticker)
 	req, err := http.NewRequest(http.MethodGet, uri, nil)
 	if err != nil {
-		fmt.Println("[Api GetSecurityByTicker http.NewRequest]:", err)
-		return nil, err
+		return nil, fmt.Errorf("[IssApiService.GetSecurityByTicker http.NewRequest]: %w", err)
 	}
 
 	// фильтруем только то что нам нужно
@@ -41,22 +41,19 @@ func (api *IssApi) GetSecurityInfoByTicker(ticker string) (*tmoex.Share, error) 
 
 	resp, err := api.client.Do(req)
 	if err != nil {
-		fmt.Println("[Api GetSecurityByTicker api.client.Get(moexSecurityUrl)]:", err)
-		return nil, err
+		return nil, fmt.Errorf("[IssApiService.GetSecurityByTicker api.client.Do(req)]: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("[Api GetSecurityByTicker body ReadAll]:", err)
-		return nil, err
+		return nil, fmt.Errorf("[IssApiService.GetSecurityByTicker ReadAll(body)]: %w", err)
 	}
 
 	data := &types.MoexApiResponseSecurityInfo{}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		fmt.Println("[Api GetSecurityByTicker MoexApiResponseSecurityInfo json.Unmarshal]:", err)
-		return nil, err
+		return nil, fmt.Errorf("[IssApiService.GetSecurityByTicker json.Unmarshal(body)]: %w", err)
 	}
 
 	var (
@@ -86,7 +83,7 @@ func (api *IssApi) GetSecurityInfoByTicker(ticker string) (*tmoex.Share, error) 
 	market = tmoex.Market(boardData[1].(string))
 	engine = tmoex.Engine(boardData[2].(string))
 
-	return &tmoex.Share{
+	return &tmoex.Security{
 		Board:     board,
 		Engine:    engine,
 		Market:    market,
@@ -96,11 +93,11 @@ func (api *IssApi) GetSecurityInfoByTicker(ticker string) (*tmoex.Share, error) 
 	}, nil
 }
 
-func (api *IssApi) GetStocksCurrentPrices(market tmoex.Market, tickers []string) (*types.MoexApiResponseCurrentPrices, error) {
+func (api *IssApiService) GetStocksCurrentPrices(ctx context.Context, market tmoex.Market, tickers []string) (*types.MoexApiResponseCurrentPrices, error) {
 	uri := fmt.Sprintf("%s/engines/stock/markets/%s/securities.json", api.baseUrl, market)
-	req, err := http.NewRequest(http.MethodGet, uri, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, uri, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[IssApiService.GetStocksCurrentPrices http.NewRequest]: %w", err)
 	}
 
 	params := url.Values{}
@@ -109,24 +106,21 @@ func (api *IssApi) GetStocksCurrentPrices(market tmoex.Market, tickers []string)
 	params.Add("securities.columns", "SECID,BOARDID,PREVPRICE")
 	req.URL.RawQuery = params.Encode()
 
-	fmt.Println("[GetStocksCurrentPrices] RequestURI:", req.URL, req.RequestURI)
 	resp, err := api.client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[IssApiService.GetStocksCurrentPrices client.Do(req)]: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("[Api GetStocksCurrentPrices body ReadAll]:", err)
-		return nil, err
+		return nil, fmt.Errorf("[IssApiService.GetStocksCurrentPrices ReadAll(body)]: %w", err)
 	}
 
 	data := &types.MoexApiResponseCurrentPrices{}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		fmt.Println("[Api GetStocksCurrentPrices MoexApiResponseCurrentPrices json.Unmarshal]:", err)
-		return nil, err
+		return nil, fmt.Errorf("[IssApiService.GetStocksCurrentPrices json.Unmarshal(body)]: %w", err)
 	}
 
 	return data, nil

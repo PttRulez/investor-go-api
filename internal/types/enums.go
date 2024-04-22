@@ -10,12 +10,12 @@ const (
 type Exchange string
 
 const (
-	Moex Exchange = "Moex"
+	EXCH_Moex Exchange = "Moex"
 )
 
 func (e Exchange) Validate() bool {
 	switch e {
-	case Moex:
+	case EXCH_Moex:
 	default:
 		return false
 	}
@@ -25,18 +25,18 @@ func (e Exchange) Validate() bool {
 type SecurityType string
 
 const (
-	Bond     SecurityType = "Bond"
+	ST_Bond  SecurityType = "Bond"
 	Currency SecurityType = "Currency"
 	Futures  SecurityType = "Futures"
 	Index    SecurityType = "Index"
 	Pif      SecurityType = "Pif"
-	Share    SecurityType = "Share"
+	ST_Share SecurityType = "Share"
 )
 
 func (e SecurityType) Validate() bool {
 	switch e {
-	case Bond:
-	case Share:
+	case ST_Bond:
+	case ST_Share:
 	default:
 		return false
 	}

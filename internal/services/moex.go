@@ -5,7 +5,8 @@ import (
 )
 
 type MoexService struct {
-	Shares ShareService
+	Shares MoexShareService
+	Bonds  MoexBondService
 }
 
 func NewMoexService(repo *types.Repository) *MoexService {

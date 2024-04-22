@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -16,22 +17,21 @@ func NewUserPostgres(db *sql.DB) types.UserRepository {
 	return &UserPostgres{db: db}
 }
 
-func (pg *UserPostgres) Insert(u User) error {
+func (pg *UserPostgres) Insert(ctx context.Context, u User) error {
 	querySting := "INSERT INTO users (email, hashed_password, name, role) VALUES ($1, $2, $3, $4);"
-	_, err := pg.db.Exec(querySting, u.Email, u.HashedPassword, u.Name, u.Role)
+	_, err := pg.db.ExecContext(ctx, querySting, u.Email, u.HashedPassword, u.Name, u.Role)
 	if err != nil {
-		fmt.Println("[UserPostgres.Insert] Failed to execute query:", err)
-		return err
+		return fmt.Errorf("[UserPostgres.Insert]: %w", err)
 	}
 
 	return nil
 }
 
-func (pg *UserPostgres) GetByEmail(email string) (*User, error) {
+func (pg *UserPostgres) GetByEmail(ctx context.Context, email string) (*User, error) {
 	querySting := `SELECT * FROM users WHERE email = $1 LIMIT 1;`
-	row := pg.db.QueryRow(querySting, email)
+	row := pg.db.QueryRowContext(ctx, querySting, email)
 	if row.Err() != nil {
-		return nil, row.Err()
+		return nil, fmt.Errorf("[UserPostgres.GetByEmail]: %w", row.Err())
 	}
 
 	var u User
@@ -42,17 +42,17 @@ func (pg *UserPostgres) GetByEmail(email string) (*User, error) {
 	case nil:
 		break
 	default:
-		return nil, err
+		return nil, fmt.Errorf("[UserPostgres.GetByEmail]: %w", err)
 	}
 
 	return &u, nil
 }
 
-func (pg *UserPostgres) GetById(id int) (*User, error) {
+func (pg *UserPostgres) GetById(ctx context.Context, id int) (*User, error) {
 	querySting := `SELECT * FROM users WHERE id = $1 LIMIT 1;`
-	row := pg.db.QueryRow(querySting, id)
+	row := pg.db.QueryRowContext(ctx, querySting, id)
 	if row.Err() != nil {
-		return nil, row.Err()
+		return nil, fmt.Errorf("[UserPostgres.GetById]: %w", row.Err())
 	}
 
 	var u User

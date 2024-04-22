@@ -9,39 +9,20 @@ type MoexApiResponseSecurityInfo struct {
 	}
 }
 
-type MoexSecurity struct {
+type Security struct {
 	Board     Board  `json:"board" db:"board"`
 	Engine    Engine `json:"engine" db:"engine"`
+	Id        int    `json:"id" db:"id"`
 	Market    Market `json:"market" db:"market"`
 	Name      string `json:"name" db:"name"`
 	ShortName string `json:"shortname" db:"shortname"`
 	Ticker    string `json:"ticker" db:"ticker"`
-}
-
-type MoexShareInfo struct {
-	MoexSecurity
-}
-
-type MoexBondInfo struct {
-	MoexSecurity
 }
 
 type Share struct {
-	Board     Board  `json:"board" db:"board"`
-	Engine    Engine `json:"engine" db:"engine"`
-	Market    Market `json:"market" db:"market"`
-	Id        int    `json:"id" db:"id"`
-	Name      string `json:"name" db:"name"`
-	ShortName string `json:"shortname" db:"shortname"`
-	Ticker    string `json:"ticker" db:"ticker"`
+	Security
 }
 
 type Bond struct {
-	Board     Board  `json:"board" db:"board"`
-	Engine    Engine `json:"engine" db:"engine"`
-	Market    Market `json:"market" db:"market"`
-	Id        int    `json:"id" db:"id"`
-	Name      string `json:"name" db:"name"`
-	ShortName string `json:"shortname" db:"shortname"`
-	Ticker    string `json:"ticker" db:"ticker"`
+	Security
 }

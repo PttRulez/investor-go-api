@@ -10,10 +10,10 @@ const (
 type Market string
 
 const (
-	Shares = "shares"
-	Bonds  = "bonds"
-	Index  = "index"
-	Selt   = "selt" // Валюта: Биржевые сделки с ЦК
+	Market_Shares = "shares"
+	Market_Bonds  = "bonds"
+	Market_Index  = "index"
+	Market_Selt   = "selt" // Валюта: Биржевые сделки с ЦК
 )
 
 type Board string

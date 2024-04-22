@@ -10,8 +10,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/pttrulez/investor-go/internal/config"
-	postgres "github.com/pttrulez/investor-go/internal/repository/postgres"
-	"github.com/pttrulez/investor-go/internal/router"
+	"github.com/pttrulez/investor-go/internal/controllers"
+	"github.com/pttrulez/investor-go/internal/repository/postgres"
 	"github.com/pttrulez/investor-go/internal/services"
 )
 
@@ -28,26 +28,26 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
-	repository, err := postgres.NewPostgresRepo(cfg.Pg)
-	services := services.NewServiceContainer(repository)
 
+	repository, err := postgres.NewPostgresRepo(cfg.Pg)
 	if err != nil {
 		panic("Failed to initialize postgres repository: " + err.Error())
 	}
-	router.Init(r, repository, services, cfg)
+	
+	services := services.NewServiceContainer(repository)
+	controllers.Init(r, repository, services)
 
 	logger := slog.Default()
 	address := fmt.Sprintf("%v:%v", cfg.ApiHost, cfg.ApiPort)
-	logger.Info(fmt.Sprintf("Listening on  %v", address))
-
 	srv := &http.Server{
 		Addr:    address,
 		Handler: r,
 	}
-
+	
+	logger.Info(fmt.Sprintf("Listening on  %v", address))
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err.Error())
-		logger.Error(err.Error())
 	}
+
 }
